@@ -47,4 +47,3 @@ def find_ukrainian_words(query_text=None, category=None):
     conn.close()
     return {"query": query_text, "category": category, "results": results}
 
-print(find_ukrainian_words('няв','звірі'))
