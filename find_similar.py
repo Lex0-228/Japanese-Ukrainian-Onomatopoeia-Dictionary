@@ -6,7 +6,7 @@ import numpy as np
 
 
 # Завантаження моделі — глобально (може тривати кілька секунд, але лише раз)
-model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+model = SentenceTransformer('distiluse-base-multilingual-cased-v2')
 
 def find_ukr_matches_for_jp_input(query_text, category=None, top_k=5):
     # Підключення до бази даних
