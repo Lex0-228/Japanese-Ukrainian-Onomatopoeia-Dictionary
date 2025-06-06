@@ -6,7 +6,7 @@ import re
 
 def find_ukrainian_words(query_text=None, category=None):
     # Підключення до бази даних
-    conn = sqlite3.connect("сайт/combined_dictionary.db")
+    conn = sqlite3.connect("combined_dictionary.db")
     cursor = conn.cursor()
     query_text = query_text.strip().lower() if query_text else None
     category = category.strip().lower() if category else None
