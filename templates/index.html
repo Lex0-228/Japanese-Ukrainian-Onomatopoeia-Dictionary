@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Електронний японсько-український словник ономатопеїчної лексики</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        input, select, button {
+            font-size: 1em;
+            padding: 5px;
+            margin: 5px 0;
+        }
+        #results div {
+            background: white;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Електронний японсько-український словник ономатопеїчної лексики</h1>
+
+    <label for="query">Введіть слово:</label><br>
+    <input type="text" id="query" placeholder="Наприклад: ばっ або Туп"><br>
+
+    <label for="lang">Мова пошуку:</label>
+    <select id="lang" onchange="toggleCategory()">
+        <option value="jp">Японська</option>
+        <option value="ukr">Українська</option>
+    </select><br>
+
+    <label for="category">Категорія:</label>
+    <select id="category">
+        <option value="">-- оберіть категорію --</option>
+        <option value="Кашель">Кашель</option>
+        <option value="Сміх">Сміх</option>
+        <option value="Їда">Їда</option>
+        <option value="Свист">Свист</option>
+        <option value="Рот">Рот</option>
+        <option value="Дефекація">Дефекація</option>
+        <option value="Сон">Сон</option>
+        <option value="Дихання">Дихання</option>
+        <option value="Розмова">Розмова</option>
+        <option value="Очі">Очі</option>
+        <option value="Плач">Плач</option>
+        <option value="Дія рукою">Дія рукою</option>
+        <option value="Крик">Крик</option>
+        <option value="Ніс">Ніс</option>
+        <option value="Стрибок">Стрибок</option>
+        <option value="Ходьба">Ходьба</option>
+        <option value="Птахи">Птахи</option>
+        <option value="Звірі">Звірі</option>
+        <option value="Комахи">Комахи</option>
+        <option value="Інші тварини">Інші тварини</option>
+        <option value="Рух">Рух</option>
+        <option value="Вибух">Вибух</option>
+        <option value="Удар">Удар</option>
+        <option value="Постріл">Постріл</option>
+        <option value="Стан">Стан</option>
+        <option value="Музика">Музика</option>
+        <option value="Техніка">Техніка</option>
+        <option value="Дзвін">Дзвін</option>
+        <option value="Вітер">Вітер</option>
+        <option value="Рідина">Рідина</option>
+        <option value="Світло">Світло</option>
+        <option value="Погода">Погода</option>
+        <option value="Магія">Магія</option>
+        <option value="Емоції">Емоції</option>
+        <option value="Тиша">Тиша</option>
+        <option value="Шум">Шум</option>
+        <option value="Вигук">Вигук</option>
+        <option value="Фразеологічно зв'язаний вигук">Фразеологічно зв'язаний вигук</option>
+    </select><br>
+
+    <button onclick="performSearch()">Пошук</button>
+    <label id="warning">(Пошук відповідників займає до 3 секунд після натискання)</label>
+    <div id="results"></div>
+
+    <script>
+
+        async function performSearch() {
+            const query = document.getElementById("query").value;
+            const lang = document.getElementById("lang").value;
+            const category = document.getElementById("category").value;
+            const container = document.getElementById("results");
+
+            container.innerHTML = "";
+
+            let url = `/search?query=${encodeURIComponent(query)}&lang=${lang}`;
+            if (category) {
+                url += `&category=${encodeURIComponent(category)}`;
+            }
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.results || data.results.length === 0) {
+                    container.innerHTML = "❌ Нічого не знайдено.";
+                    return;
+                }
+
+                data.results.forEach((item, i) => {
+                    let html = `<h3>${i + 1}. `;
+                    if (item.word) {
+                        html += `${item.word}</h3>`;
+                    } else if (item.match) {
+                        html += `${item.match.hiragana} / ${item.match.katakana} / ${item.match.romaji}</h3>`;
+                    }
+
+                    if (item.synonyms && item.synonyms.length) {
+                        html += `<p>Синоніми: ${item.synonyms.join(" / ")}</p>`;
+                    }
+                    if (item.definition) {
+                        html += `<p>Визначення: ${item.definition}</p>`;
+                    }
+                    if (item.category) {
+                        html += `<p>Категорія: ${item.category}</p>`;
+                    }
+                    if (item.examples) {
+                        html += `<p>Приклади: ${item.examples}</p>`;
+                    }
+                    if (item.examples_translation) {
+                        html += `<p>Переклад: ${item.examples_translation}</p>`;
+                    }
+                    if (item.source) {
+                        html += `<p>Джерело: ${item.source}</p>`;
+                    }
+                    if (item.ukrainian_matches && item.ukrainian_matches.length) {
+                        html += "<p>Українські відповідники:<ul>";
+                        item.ukrainian_matches.forEach(match => {
+                            html += `<li>${match.word} — ${match.definition} (Подібність: ${match.similarity})</li>`;
+                        });
+                        html += "</ul></p>";
+                    }
+
+                    html += `<hr>`;
+                    const div = document.createElement("div");
+                    div.innerHTML = html;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                container.innerHTML = "⚠️ Виникла помилка при запиті.";
+                console.error(error);
+            }
+        }
+    </script>
+<footer style="margin-top: 50px; text-align: center; font-size: 0.9em; color: #555;">
+    <hr style="margin-bottom: 10px;">
+    <p>Цей сайт створено в рамках дипломного проєкту. Автор: Ларіонов Олексій, 2025</p>
+    <a href="https://docs.google.com/spreadsheets/d/1ZWR51b7RxSXdSYVFvGzWCDwQvXLyGbS2x-2-70-HBxY/edit?usp=sharing">Повний реєстр словника у форматі електронної таблиці.</a>
+    <p>Якщо бажаєте запропонувати нові слова для словника, <a href="https://forms.gle/iEbpBABUaoeBWNdT9">заповніть форму.</a></p>
+</footer>
+</body>
+</html>
