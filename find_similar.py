@@ -150,5 +150,3 @@ def find_ukr_matches_for_jp_input(query_text, category=None, top_k=5):
         results.append(result)
 
     return {"query": query_text, "category": category, "results": results}
-
-print(find_ukr_matches_for_jp_input('nyaa', 'Звірі'))
